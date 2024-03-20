@@ -1,7 +1,12 @@
 # ignore map, miou, datasets
+img/
+img_out/
+datasets/
+
 map_out/
 miou_out/
 VOCdevkit/
+VOCdevkit1/
 datasets/
 Medical_Datasets/
 lfw/

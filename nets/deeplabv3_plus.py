@@ -3,7 +3,26 @@ import torch.nn as nn
 import torch.nn.functional as F
 from nets.xception import xception
 from nets.mobilenetv2 import mobilenetv2
+from nets.mobilevit import mobilevit_s
 
+class MobileVit(nn.Module):
+    def __init__(self):
+        super(MobileVit, self).__init__()
+        model = mobilevit_s()
+        self.features = model
+
+    def forward(self, x):
+        x = self.features.conv1(x)
+        x = self.features.mv2[0](x)
+
+        x = self.features.mv2[1](x)
+        x = self.features.mv2[2](x)
+        low_featrue_layer = self.features.mv2[3](x)      # Repeat
+    
+        x = self.features.mv2[4](low_featrue_layer)
+        x = self.features.mvit[0](x)
+        return low_featrue_layer, x 
+          
 class MobileNetV2(nn.Module):
     def __init__(self, downsample_factor=8, pretrained=True):
         super(MobileNetV2, self).__init__()
@@ -134,6 +153,11 @@ class DeepLab(nn.Module):
             self.backbone = MobileNetV2(downsample_factor=downsample_factor, pretrained=pretrained)
             in_channels = 320
             low_level_channels = 24
+        elif backbone=="mobilevit":
+            self.backbone = MobileVit()
+            in_channels = 96
+            low_level_channels = 64
+
         else:
             raise ValueError('Unsupported backbone - `{}`, Use mobilenet, xception.'.format(backbone))
 
